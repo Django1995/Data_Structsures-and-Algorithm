@@ -1,0 +1,232 @@
+Data_Structsures-and-Algorithm
+==============================
+#include <iostream>
+using namespace std;
+const int LH = 1;
+const int EH = 0;
+const int RH = -1;
+bool TRUE = 1;
+bool FALSE = 0;
+
+typedef struct BSTNode
+{
+	int key;
+	int bf;
+	BSTNode *lchild, *rchild;
+}BSTNode;
+
+//中序遍历
+void inordertree(BSTNode * &root)
+{
+	if (root)
+	{
+		inordertree(root->lchild);
+		cout << root->key<<",";
+		inordertree(root->rchild);
+	}
+}
+
+//前序遍历
+void preordertree(BSTNode * &root)
+{
+	if (root)
+	{
+		cout << root->key<<",";
+		preordertree(root->lchild);
+		preordertree(root->rchild);
+	}
+}
+//右旋
+void R_Rotate(BSTNode * &p)
+{
+	BSTNode *lc = p->lchild;
+	p->lchild = lc->rchild;
+	lc->rchild = p;
+	p = lc;
+}
+
+//左旋
+void L_Rotate(BSTNode *& p)
+{
+	BSTNode *rc = p->rchild;
+	p->rchild = rc->lchild;
+	rc->lchild = p;
+	p = rc;
+}
+
+void LeftBalance(BSTNode * &T)
+{
+	BSTNode *lc = T->lchild;
+	switch (lc->bf)
+	{
+	case LH:
+		T->bf = lc->bf = EH;
+		R_Rotate(T);
+		break;
+	case RH:
+		BSTNode *rd = lc->rchild;
+		switch (rd->bf)
+		{
+		case LH:
+			T->bf = RH;
+			lc->bf = EH;
+			break;
+		case EH:
+			T->bf = lc->bf = EH;
+			lc->bf = LH;
+			break;
+		}
+		rd->bf = EH;
+		L_Rotate(T->lchild);//先左旋
+		R_Rotate(T);
+		break;
+	}
+}
+
+void RightBalance(BSTNode *& T)
+{
+	BSTNode *rc = T->rchild;
+	switch (rc->bf)
+	{
+	case RH:
+		T->bf = rc->bf = EH;
+		L_Rotate(T);
+		break;
+	case LH:
+		BSTNode *ld = rc->lchild;
+		switch (ld->bf)
+		{
+		case RH:
+			T->bf = LH;
+			rc->bf = EH;
+			break;
+		case EH:
+			T->bf = rc->bf = EH;
+			break;
+		case LH:
+			T->bf = EH;
+			rc->bf = RH;
+			break;
+		}
+		ld->bf = EH;
+		R_Rotate(T->rchild);
+		L_Rotate(T);
+		break;
+
+	}
+}
+
+int insertAVL(BSTNode *& t, int e, bool &taller)
+{
+	if (!t)
+	{
+		t = new BSTNode;
+		t->key = e;
+		t->lchild = t->rchild = NULL;
+		t->bf = EH;
+		taller = TRUE;
+
+	}
+	else
+	{
+		if (e == t->key)
+		{
+			taller = FALSE;
+			return 0;
+		}
+		if (e < t->key)
+		{
+			if (!insertAVL(t->lchild, e,taller))
+				return 0;
+			if (taller)
+			{
+				switch (t->bf)
+				{
+				case LH:
+					LeftBalance(t);
+					taller = FALSE;
+					break;
+				case EH:
+					t->bf = LH;
+					taller = TRUE;
+					break;
+				case RH:
+					t->bf = EH;
+					taller = FALSE;
+					break;
+
+				}
+			}
+		}
+		else
+		{
+			if (!insertAVL(t->rchild, e, taller))
+				return 0;
+			if (taller)
+			{
+				switch (t->bf)
+				{
+				case RH:
+					RightBalance(t);
+					taller = FALSE;
+					break;
+				case EH:
+					t->bf = RH;
+					taller = TRUE;
+					break;
+				case LH:
+					t->bf = EH;
+					taller = FALSE;
+					break;
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+BSTNode *search(BSTNode *t, int key)
+{
+	BSTNode *p = t;
+	while (p)
+	{
+		if (p->key == key)
+			return p;
+		else if (p->key < key)
+			p = p->rchild;
+		else
+			p = p->lchild;
+	}
+	return p;
+}
+
+int main()
+{
+	BSTNode *root = NULL;
+	BSTNode *r;
+	bool taller = FALSE;
+	int array[] = { 13, 24, 37, 90, 53 };
+	for (int i = 0; i < 5; i++)
+		insertAVL(root, array[i], taller);
+	cout << "inorder traverse..." << endl;
+	inordertree(root);
+	cout << endl;
+	cout << "preorder traverse..." << endl;
+	preordertree(root);
+	cout << endl;
+	cout << "search key..." << endl;
+	r = search(root, 37);
+	if (r)
+	{
+		cout << r->key << endl;
+	}
+	else
+	{
+		cout << "not find" << endl;
+	}
+	system("pause");
+	return 0;
+}
+
+
+Data_Structsures and Algorithm
